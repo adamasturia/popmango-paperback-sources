@@ -2894,10 +2894,9 @@ Please go to the homepage of <${hostOf(request.url)}> and press the cloud icon.`
         position
       }))
     );
-    const byVolume = hasChapterNumberResets(releases, (entry) => parseChapterNumber2(entry.vol));
     const bySeason = hasChapterNumberResets(releases, parseChapterSeason);
     const chapterKey = (release) => JSON.stringify([
-      byVolume ? parseChapterNumber2(release.vol) ?? release.vol?.toString().trim().toLowerCase() : "",
+      parseChapterNumber2(release.vol) ?? release.vol?.toString().trim().toLowerCase() ?? "",
       bySeason ? parseChapterSeason(release) ?? 1 : "",
       parseChapterNumber2(release.n) ?? `id:${release.canonicalId}`
     ]);
@@ -3028,7 +3027,7 @@ Please go to the homepage of <${hostOf(request.url)}> and press the cloud icon.`
   var ToonkotsuInfo = sourceInfo({
     name: "Toonkotsu",
     description: "Extension that pulls content from toonkotsu.com.",
-    version: "1.1.7",
+    version: "1.1.8",
     icon: "icon.png",
     language: "English",
     websiteBaseURL: DOMAIN,
