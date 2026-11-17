@@ -1917,7 +1917,7 @@ var _Sources = (() => {
   var MAX_PAGE_RETRIES = 3;
   var CLOUDFLARE_ERROR = "CLOUDFLARE BYPASS ERROR:\nPlease go to the homepage of <MangaK> and press the cloud icon.";
   var MangaKInfo = {
-    version: "0.2.6",
+    version: "0.2.7",
     name: "MangaK",
     description: "Extension that pulls manga from MangaK",
     author: "IvanMatthew",
@@ -2180,6 +2180,8 @@ var _Sources = (() => {
       this.pageHosts = /* @__PURE__ */ new Set();
       // Page retries in flight, so a retry that fails is not retried again
       this.retrying = /* @__PURE__ */ new Set();
+      // TEST BUILD ONLY: page 1's first request is sent with a referer the hosts refuse
+      this.forceRefuse = /* @__PURE__ */ new Set();
       this.requestManager = App.createRequestManager({
         // Page images go through this limit too: without one, a chapter asks
         // for all its pages at once, and the image hosts start refusing them
@@ -2187,9 +2189,10 @@ var _Sources = (() => {
         requestTimeout: 15e3,
         interceptor: {
           interceptRequest: async (request) => {
+            const refuse = this.forceRefuse.delete(request.url);
             request.headers = {
               ...request.headers,
-              referer: `${BASE_URL}/`
+              referer: refuse ? "https://example.com/" : `${BASE_URL}/`
             };
             return request;
           },
@@ -2490,6 +2493,9 @@ var _Sources = (() => {
         `${mangaId}/${chapterId}.json`
       );
       const chapter = data.pageProps.initialChapter;
+      if (chapter.images[0]) {
+        this.forceRefuse.add(chapter.images[0]);
+      }
       for (const image of chapter.images) {
         const host = splitUrl(image)?.host;
         if (host) {
